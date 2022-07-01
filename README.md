@@ -1,444 +1,419 @@
-# On16-TodasEmTech-S13-Projeto-3-CRUD-BD
-Turma Online 16 - Todas em Tech | Back-end | 2022 | Semana 13 - Projeto Guiado CRUD com MongoDB
+# Autenticação
 
-## Olá, prazer em conhece-las💜
+<h1 align="center">
+    <br>
+    <p align="center">Autenticação<p>
+</h1>
 
-Um pouquinho sobre mim.  Meu nome é Beatriz Ramerindo, sou engenheira de software, não possui faculdade, trabalho com enfãse em desenvolvimento back-end de produto, nas stacks de Spring com Koltin e e Express/Node com Typescript/Javascript.  Sou tão apaixonada por Js que ganhei uma caneca da mesma, apaixonada que só né, amo falar sobre, mas porque raios afinal `0 + null = 0?`. Prazer em conhece-las, quem curtir ai um anime de um pirata que estica e/ou curti um lolzinho, chama no PV depois e bora criar umas teoria ai ou uma flex?
+## Vamos falar sobre segurança!
 
-- Chamada, apresentação das monitoras e acordos:
+![hacker](https://st2.depositphotos.com/2631505/10530/i/450/depositphotos_105305530-stock-photo-young-attractive-teen-woman-wearing.jpg)
 
-<img src="https://i.pinimg.com/474x/b4/17/86/b41786b5e7627ed0c678a0ef4a62e9f6.jpg" alt="video chamada" width="200">
+Nas aulas anteriores você aprendeu sobre rotas POST, GET, PATCH, PUT e DELETE. Aprendeu também sobre banco de dados e também a utilizar essas rotas para trabalhar com os dados. Entretanto, concorda que qualquer pessoa hoje que tiver acesso a essas rotas que criou poderá utilizá-las livremente para salvar, trazer, alterar e deletar informações sem o menor tipo de controle? 
 
-* Caso queira fazer uma pergunta, levante a mão por favor.
-* Enviar as dúvidas no chat, assim minhas queridas monitoras podem ajudar.
-* Manter microfone desligado quando outras pessoas estiverem falando
-* Manter câmera ligada o máximo possível
-* momento de olho na tela, sim depois deixo copiar 😌
+Isso é extremamente perigoso, não somente para a segurança da aplicação em si, mas para todo o negócio! Imagina que você está desenvolvendo um produto para um cliente (que pode ser de qualquer nicho, como por exemplo, financeiro, área médica, educação etc) e os dados dos clientes são vazados ou mesmo alterados na base de dados? É um problema bem grande, certo? Por isso é importante que tenhamos um mínimo (e máximo) de cuidado com a segurança do que desenvolvemos.
 
-<br>
-<br>
+> Mas como você acha que podemos aumentar a segurança das rotas nas APIs?
 
-## Revisão
+Podemos criar um login para os usuários e somente esses usuários que estão logados (autenticados) vão poder fazer chamadas para nossas rotas.
 
-### `1. Por que precisamos de um banco de dados?`
+## Login - Autenticação
 
-Vantagens: 
-* Facilidade de acesso
-* Análises e comparativos
-* Segurança de dados
-* Atualizações e aprimoramento das informações
-* Escalabilidade 
+Na aula de hoje iremos aprender a autenticar nossos usuários (login e senha) e proteger nossas rotas permitindo apenas que os usuários logados possam chamá-las! Com isso vamos ter uma aplicação mais segura e protegida!
 
-<br>
-<br>
+Mas como funciona isso?
 
-#### `2. NoSQL v/s SQL`
+![token-login](https://i.stack.imgur.com/41htB.png)
 
-| NoSQL | SQL |
-| --- | --- |
-| `Surgiu no final dos anos 90 e como uma alternativa de natureza não relacional` | RDBMS ou Sistema de Gerenciamento de Banco de Dados Relacional, armazenam dados em um formato estruturado, usando linhas, colunas e tabelas |
-| `Possuem alta escalabilidade e desempenho` | Geralmente demanda distribuição vertical de servidores, o que gera mais custo, pois quanto mais dados, mais memória e mais disco um servidor precisa. |
-| `Alguns tipos de bancos de dados não relacional: armazenamento de chave-valor, armazenamento column family, orientado a grafos e orientado a documentos` | Structured Query Language, ou Linguagem de Consulta Estruturada ou SQL, é a linguagem de pesquisa declarativa padrão para banco de dados relacional.|
+1) O usuário loga na aplicação com seu usuário e senha pelo frontend que chama a rota de login da API
+2) A API retorna para esse usuário um token (um código de autorização)
+3) Esse código (token) chega até o frontend e deverá ser utilizado nas demais chamadas da API para que as chamadas estejam autorizadas.
 
-Aqui está um comparativo dos termos MongoDb e SQL:
+## Autenticação vs Autorização
 
-| MongoDB | SQL |
-| --- | --- |
-| `database` | database|
-| `collection` | table|
-| `document` | row|
-| `field` | column|
-| `lookup` | table joins|
+- A autenticação é a checagem da identidade de um usuário ou sistema. Existem várias formas de autenticação, como por exemplo login com usuário e senha, autenticação biométrica etc.
 
+- A autorização é a checagem de permissão de um usuário autenticado.
 
-<br>
-<br>
+Um analogia que podemos fazer para exemplificar uma autenticação e autorização é um vôo. O passageiro faz a autenticação na entrada do vôo quando sua identidade é checada, mas não necessariamente esse passageiro tem autorização para acessar a primeira classe.
 
-#### `3. O que é MongoDB?`
-Um banco de dados não relacional, orientado a documentos, livre com o código aberto e multiplataforma. Ele foi escrito na linguagem C++.
+> Mas como você armazenaria a senha desse usuário na base de dados para uma autenticação?
 
-No MongoDB, os conjuntos de dados forma uma collection, cada item forma um documento e dentro dos documentos temos os campos.
+Para armazenar senhas na base de dados, por exemplo, podemos utilizar um hash. Mas o que seria hash?
 
-Os dados são armazenados no formato JSON, o que é uma grande facilidade para quem programa com Javascript.
+## Hash
 
-Podemos usá-lo pelo serviço de nuvem(cloud) ou localmente fazendo o download para nossa máquina (vamos usar essa opção).
+![hash](https://criptofy.com/wp-content/uploads/2019/10/hashing-1024x449.png)
 
-Além disso, o Mongo possui seu driver com suas próprias queries(comandos para interação com o banco que se assemelham muito com javascript com orientação a objeto), podemos também usar uma interface gráfica e ainda podemos usar um ODM(vamos usar a última opção).
+- Hash é uma string (texto) criptografada e é gerada a partir de uma função de Hash. O hash pode ter diversas utilidades, como por exemplo, armazenar uma senha numa base de dados para uma posterior checagem.
 
-#### `4. Quem usa MongoDB?`
-Mais de 22.600 clientes no mundo usam MongoDB. Algumas delas: Google, Forbes, eBay, Toyota, SAP, Adobe e muitas outras.
+> Importante: uma função de hash não tem volta, uma vez que você transforma uma string em um hash, a partir de uma função de hash, não é possível transformar novamente na string original.
 
-#### `5. Operações de CRUD`
-O CRUD é um acrônimo para Create, Read, Update e Delete(criação, consulta, atualização e remoção de dados) . São as 4 operações principais em um banco de dados. No MongoDB, usando o Mongoose essas funcionalidades são:
+Os algoritmos mais conhecidos para hash são: MD5, SHA-1 e SHA-2.
 
+- Vantagem: É uma operação pouco custosa de computação e segura pois é unidirecional, isto é, impossível de você voltar a string original a partir do hash.
 
-| OPERAÇÃO | MONGODB | MONGOOSE |
-| --- | --- | --- |
-| `C`REATE | insertOne() | save() |
-| `R`EAD | find() | find() |
-| `U`PDATE | updateOne() | save() |
-| `D`ELETE | deleteOne() | remove() |
+- Desvantagem: a principal desvantagem é que não é possível recuperar uma senha; você só pode redefinir sua senha.
 
-Para conhecer todas as operações MongoDb: 
-https://docs.mongodb.com/manual/crud/
+Site com a função hash: https://passwordsgenerator.net/sha1-hash-generator/
 
-#### `6. O que é odm?`
-Uma ferramenta que mapeia entre um Modelo de Objeto e um Banco de Dados de Documentos.
+## Criptografia
 
-#### `7. Mongoose`
+![alan_turing_e_joan_clarke](https://www.cutedrop.com.br/wp-content/uploads/2015/10/alan-e-clarke.jpg)
 
-Mongoose é uma modelagem de objeto mongodb elegante para node.js.
+Quando falamos de criptografar logo pensamos em algo super complexo, mas isso nada mais é do que codificar uma mensagem que você não quer que pessoas não autorizadas tenha acesso. 
 
-Tudo no Mongoose começa com um Schema. Cada esquema é mapa para uma coleção MongoDB e define a forma dos documentos dentro dessa coleção.
+Um filme bem bacana que fala desse tema e que vale a pena assistir é o Jogo da Imitação, que conta sobre o matemático Alan Turing e a criptoanalista Joan Clarke na Segunda Guerra Mundial, quando desenvolveram uma máquina que foi capaz de descriptografar (revelar) mensagens de comunicação da Alemanha Nazista.
 
-Exemplo photoshop x Filtro do Instagram
+### Exemplos de criptografia
 
-#### `8. Conceito de Model (Schema)`
-Nosso mongoose utiliza a `Schema` para pôr ordem na ' bagunça ', afinal como podemos salvar qualquer coisa, de qualquer jeito, seria uma loucura não?  Para isso precisamos de um schema( espelho ) de como será salvo nosso `document`.
+![criptografia-simples](https://acaditi.com.br/wp-content/uploads/2019/11/acaditi-criptografia.png)
 
-Além disso, nos permite fazer o relacionamento de dados entre os collections diferentes.
+![criptografia-exemplo](https://upload.wikimedia.org/wikipedia/commons/f/f8/Crypto.png)
 
-exemplo de schema:
+No caso o "Hello World" após ser criptografado se torna um texto cifrado que apenas depois de descriptografado terá seu valor texto real revelado.
 
-```javascript
-const mongoose = require('mongoose');
+## Criptografia Simétrica
 
-const PokemonSchema = monogoose.Schema({
-    name: String,
-    avaliable: Boolean,
-    birthdate: Date,
-    abilities: [String],
-    attributes: {
-      hp: Number,
-      attack: Number,
-      defense: Number,
-    }
+Os algoritmos de criptografia simétrica utilizam apenas uma chave para criptografar um dado qualquer, que pode ser uma mensagem, etc. Os algoritmos mais conhecidos são: DES, TripleDES, AES, RC4 e RC5.
+
+A principal vantagem da criptografia simétrica é que são muito rápidos, o que se traduz em baixa latência (tempo que demora para iniciar e terminar) e pouco uso de CPU. Já a principal desvantagem é que por utilizar a mesma chave para criptografar quanto para descriptografar, a chave precisa ser compartilhada com o receptor. Se alguém conseguir pegar essa chave, todas as mensagens poderão ser reveladas.
+
+![criptografia-simetrica](http://www.universidadejava.com.br/images/2020-05-22-criptografia-simetrica-01.png)
+
+## Criptografia Assimétrica
+
+Os algoritmos de criptografia assimétrica utilizam duas chaves complementares para criptografar e descriptografar. Uma das chaves é guardada em segredo e não é revelada ninguém (chave privada) e outra pode ser publicada a qualquer um livremente (chave pública). Os algoritmos mais conhecidos são: RSA e ECDSA.
+
+Um grande diferencial dessa classe de algoritmos é que um dado criptografado com uma chave pode apenas ser descriptografado com outra e vice-versa. Essa característica permite que estranhos mantenham uma comunicação segura mesmo que o meio de comunicação não seja tão seguro. Além disso, não há a necessidade de um meio seguro para que a troca de chave pública ocorra.
+
+![criptografia-assimetrica](https://i.imgur.com/MUfQ2eO.png)
+
+Algoritmos de criptografia assimétrica são muito custosos em termos de CPU, por esse motivo as comunicações, normalmente, os utilizam como meio de troca de chave simétrica. Diminuindo, assim o tempo e recursos da CPU. Na prática, a criptografia assimétrica é utilizada uma vez para transportar a chave de criptografia simétrica até seu destino para passar a ser utilizada.
+
+![criptografia-assimetrica](http://www.universidadejava.com.br/images/2020-05-23-criptografia-assimetrica-02.png)
+
+### Assinaturas
+
+Há também outro uso muito comum para a criptografia assimétrica, além de ser utilizada para garantir privacidade, também é utilizada em assinaturas para garantir identidade. Quando queremos apenas confirmar identidade o dado não é privado, pois a chave pública está disponível a qualquer um, o que permite que os mesmos acessem os dados. Assim, uma maneira eficiente de alcançar o mesmo objetivo, com quase a mesma eficiência, é gerar uma soma Hash (Checksum) do dado e criptografar esse resultado. Então a confirmação de identidade passaria a ser da seguinte maneira: gerar uma soma Hash do dado recebido, descriptografar a assinatura recebida e por fim comparar se os resultados são iguais.
+
+![assinaturas](https://www.gta.ufrj.br/grad/07_1/ass-dig/NotesImages/Topic9NotesImage2.jpg)
+
+## OAuth
+
+É um mecanismo de autorização utilizado para realizar login por meio de redes sociais (ex: login pelo Facebook, Twitter etc).
+
+![oauth_2](https://i.stack.imgur.com/YTtMz.png)
+
+## JWT - Json Web Token
+
+### Conceito
+
+O padrão JWT permite as informações sejam assinadas tanto com criptografia simétrica (com o algoritmo HMAC) quanto com criptografia assimétrica (com os algoritmos RSA e ECDSA).
+
+Os JWTs são muito utilizados no processo de autenticação permitindo que o processo de autorização de acesso a recursos seja mais rápido e escalável. Mais rápido porque por ser independente retira da equação o tempo de latência de acesso ao banco de dados ou outro mecanismo de cache. E mais escalável pois permite que serviços totalmente independentes compartilhem a mesma autenticação sem necessitar de comunicação entre os mesmos.
+
+### Estrutura
+
+- Header
+- Payload
+- Signature
+
+O cabeçalho é codificado utilizando o algoritmo Base64Url, antes de compor um JWT.
+
+![jwt_estrutura](https://supertokens.com/static/b0172cabbcd583dd4ed222bdb83fc51a/9af93/what-is-jwt.png)
+![jwt_estrutura_2](https://research.securitum.com/wp-content/uploads/sites/2/2019/10/jwt_ng1_en.png)
+
+#### Header
+
+É um objeto JSON que define informações sobre o tipo do token (typ), nesse caso JWT, e o algorítmo de criptografia em sua assinatura (alg), normalmente HMAC SHA256 ou RSA. 
+
+#### Payload
+
+É um objeto JSON com as Claims (informações) da identidade tratada, normalmente o usuário autenticado.
+
+![payload_1](https://i.imgur.com/oN1fR5s.png)
+![payload_2](https://i.imgur.com/aRtxfxN.png)
+![payload_3](https://i.imgur.com/WPltx9H.png)
+
+#### Signature
+
+![Signature_1](https://i.imgur.com/cVggV3E.png)
+
+#### Estrutura final
+
+![estrutura_jwt](https://i.imgur.com/3VjcFVK.png)
+
+### Vulnerabilidades
+
+Se a biblioteca aceita que um token seja validado sem especificar o algoritmo esperado, outra vulnerabilidade grave é aberta. Exatamente no caso esperarmos que o token use uma criptografia assimétrica e o atacante utiliza uma criptografia simétrica. O problema com essa lógica é que o atacante pode obter a chave pública e assinar um token qualquer utilizando um algoritmo simétrico (HMAC) e indicar no cabeçalho o mesmo algoritmo. Assim quando um recurso protegido utilizar o mesmo algoritmo e a mesma chave o token será considerado válido, pois a **assinatura gerada** será igual a **assinatura do token**.
+
+![vulnerabilidades](https://i.imgur.com/imKqVzs.png)
+
+Lembrando que nesse caso como os tokens válidos estão sendo assinados com a chave privada os mesmos devem ser validados com a chave pública. Por isso o atacante terá sucesso, pois tem a certeza que o token está sendo validado com a chave pública.
+
+### Recomendações
+
+Desenvolvedores deveriam exigir que o algoritmo utilizado para validação seja passado como parâmetro. Assim garante-se que será utilizado o algoritmo
+apropriado para a chave fornecida. Caso seja necessária a utilização de mais de um algoritmo com chaves diferentes, a solução é atribuir um identificador para cada chave e indicá-la no campo kid do cabeçalho (key identifier, em inglês). Assim será possível inferir o algoritmo de acordo com a chave utilizada. Dessa maneira o campo alg não terá utilidade alguma além de, talvez, validar se ele indica o algoritmo esperado.
+
+Ao utilizar uma implementação do padrão JWT, você deve auditar de maneira consistente se ela rejeita efetivamente algoritmos além do esperado. Assim a
+possibilidade de sucesso em ataques dessa natureza estarão quase nulos.
+
+## Vamos por a mão na massa!
+
+![mao_massa](https://espacojacyra.com.br/wp-content/uploads/2017/05/Untitled-1-1.png)
+
+Utilizando o projeto da aula anterior, pasta ***S13-Projeto-3-CRUD-BD*** (https://github.com/reprograma/On16-TodasEmTech-S14-Auth/tree/master/S13-Projeto-3-CRUD-BD), vamos evoluí-lo para criar autenticação utilizando JWT. Para isso vamos seguir os passos:
+
+### Instalar todas as bibliotecas que iremos utilizar
+
+```
+$ npm install jsonwebtoken -- save // para utilizar o jwt
+$ npm install bcrypt -- save // para encriptar as senhas
+$ npm install dotenv-safe -- save // para carregar o arquivo .env
+```
+
+### Arquivos env
+
+- Criar arquivo .env.example e .env (adicionar no .gitignore), ambos com chave chamada SECRET $ SECRET=chave_aqui_sem_aspas
+- Utilizar uma secret que pode ser gerada pelo https://passwordsgenerator.net/sha1-hash-generator/ e guardar essa secret no arquivo env
+
+### Criar rotas para colaboradoras (criar, listar, deletar e login)
+
+- Criar model de colaboradoras com id, nome, email e senha
+  
+  ```
+  const mongoose = require('mongoose');
+  ```
+
+//estrutura do seu model (atributos da sua entidade)
+const colaboradorasSchema = new mongoose.Schema({
+    nome: { type: String },
+    email: { type: String },
+    senha: { type: String }
+}, {
+    //gera por padrão uma versão para cada atualização do documento
+    versionKey: false
 });
 
-```
+// atribuindo o esquema a uma collection
+// estou definindo o nome da collection que irei salvar no banco
+const colaboradoras = mongoose.model('colaboradoras', colaboradorasSchema);
 
-#### `9. Passos para conectar o MongoDb usando mongoose:`
-
-1 - Crio minha configuracao de conexao no database, passando informacoes padrão e a minha string de conexão
-2 - Crio meu schema no model
-3 - requiro no app e chamo a função de conexão
-
-
-## [extra: 01] Dotenv - variaves de ambiente
-
-Essa dica com certeza dará mais maturidade aos seus códigos de backend.
-Afinal de contas dotenv é uma excelente ferramenta para gerenciar os dados sensíveis de desenvolvimento que não devem ser compartilhados como: chaves de API’s, informações do banco de dados, entre outras.
-
-Vem aprender como orquestrar suas variáveis do ambiente dev em apenas 4 passos:
+// exportar o model para ser utilizado
+module.exports = colaboradoras;
 
 ```
-1- No seu projeto node com express, instale como dependência de desenvolvimento o dotenv. Utilize yarn ou npm.
-
-yarn add dotenv -D
-npm I —save-dev dotenv
-
-2- Crie o arquivo .env
-
-E nele crie suas chaves e valores que contém informações sensíveis e não podem ser compartilhadas além do ambiente de dev.
-
-Por padrão as chaves são maiúsculas e não podem conter espaço, os valores ficam após o igual e podem ser de qualquer tipo pois retornarão sempre uma string:
-
-NOME_DA_CHAVE=valor
-
-3- Execute o ‘dotenv’, importando, usando a função config e incluindo ao processo para ler as variáveis configuradas:
-
-require(‘dotenv’).config( )
-process.env.NOME_DA_CHAVE
-
-4- Como boa prática lembre-se de incluir seu arquivo .env no .gitignore
-
-Você pode criar um .env.example e deixar apenas as chaves genéricas
-```
-## [extra: 02] Classes | POO (orientação a objetos) Conceitos básicos
-Uma breve introdução sobre classes e objetos, para que possamos entender melhor o  nosso ORM.
-
-###  uso da palavra reservada `new`
-Quando possuímos uma classe, podemos utilizar a palavra reservada `new`  para instanciar um objeto, ou seja, construir um novo documento a partir da classe( nossa `Schema` ),  afinal, não queremos que um Pikachu, se transforme num Charmander.
-
-```javascript
-const pokemon = new Model({
-    name: 'Pikachu',
-    avaliable: true,
-    abilities: ['choque-do-trovao', 'esquivar'],
-    attributes: {
-      hp: 100,
-      attack: 55,
-      defense: 40,
-    }
-});
-
+- Criar rota para criar usuária em routes/colaboradorasRoute.js:
 ```
 
-### Métodos
-Como mencionamos em aulas passadas, assim como o objeto, as classes possuiem métodos, que são funções que nos auxiliam a realizar **ações** como por exemplo: salvar um pokemon, ou um ataque especial como shock do trovao, no nosso dia-a-dia usamos o console`.log`, *.log("hello word")* é um método que nos permite imprimir no terminal uma mensagem de texto.
+const express = require("express");
+const router = express.Router();
+const controller = require('../controller/colaboradorasController');
 
-#### Métodos relação com a nossa API
+router.post('/colaboradoras/', controller.create);
 
-| OPERAÇÃO | MONGODB | MOOGOSE | DESCRIÇÃO | HttpCode
-| ---------- | -------------- | ---------------- | ----------------- | ---- |
-| **C**REATE | **db**.insertOne() | new **MusicModel**() | cria um documento | 201 |
-| **R**EAD | **db**.find() |  **MusicModel**.find() | ler um documento | 200 |
-| **U**PDATE | **db**.updateOne() | **MusicModel**.updateOne() | atualiza um documento | 200 |
-| **D**ELETE | **db**.deleteOne() | **MusicModel**.deleteOne() | deleta um documento | 200 ou 204
+module.exports = router;
 
-
-### Constructor
-Nosso `constructor` é responsável por inicializar a nossa classe, ele recebe os parametros para criar construir a instancia da classe, como por exemplo, nossa música, é assim que nossa Schema gera a música no formato que o banco espera, no caso do mongo, um BJSON.
-
-### Tipagem - Tipos primários
-Na programação, existem tipos primários, que são responsáveis por definir o tipo de informação ( dado ) que estamos trabalhando, por exemplo um número de celular `Number`, ou um email que é texto `String`, ou até mesmo se é verdadeiro(true) ou falso(false) que é um `Boolean`, além disso, temos o `Date` que representa uma data. 
-
- - String -> representa *texto* -> `""`
- - Number -> representa *número*  `0`
- - Boolean -> representa `true` ou `false`
- - Date -> representa uma data, por exemplo, 1970-01-13 -> `Date`
-
-```typescript
-    name: String,
-    avaliable: Boolean,
-    birthdate: Date,
-    abilities: [String],
-    attributes: {
-      hp: Number,
-      attack: Number,
-      defense: Number,
-    }
+```
+- Criar adicionar routes/colaboradorasRoute.js no arquivo app.js:
 ```
 
-## Sobre o Projeto
+const coachRoutes = require('./routes/coachRoutes')
+const pokedexRoutes = require('./routes/pokedexRoutes')
+const colaboradorasRoutes = require('./routes/colaboradorasRoute') // aqui
 
-O **{Pokedex}** é um sistema de gerenciamento de pokemons e treinadores.
+// { restante do codigo }
 
-Onde receberemos cadastros de pokemons referenciando cada ao seu respectivo treinador. 
+app.use(coachRoutes)
+app.use(pokedexRoutes)
+app.use(colaboradorasRoutes) // aqui
 
-```javascript
- // "Relacionamento" no MongoDB? Como é isso?
+```
+- Criar controller colaboradorasController com a função create:
+```
 
-coach { // 'coach' nome da key 'chave' da schema
-  type: mongoose.Schema.Types.ObjectId, // id de referencia,
-  ref: 'coach' // colection de referencia
+const Colaboradoras = require('../models/colaboradorasModel');
+const bcrypt = require('bcrypt');
+
+const create = (req, res) => {
+    const senhaComHash = bcrypt.hashSync(req.body.senha, 10);
+    req.body.senha = senhaComHash;
+    const colaboradora = new Colaboradoras(req.body);
+
+    colaboradora.save(function (err) {
+        if (err) {
+            res.status(500).send({ message: err.message })
+        }
+    
+        res.status(201).send(colaboradora)
+    })
+
+};
+
+module.exports = {
+    create,
 }
 
 ```
+- Criar uma colaborada de teste via Postman
 
-## Tecnologias que vamos usar:
-| Ferramenta | Descrição |
-| --- | --- |
-| `javascript` | Linguagem de programação |
-| `nodejs` | Ambiente de execução do javascript|
-| `express` | Framework NodeJS |
-| `dotenv` | Dependência para proteger dados sensíveis do projeto|
-| `mongoose` | Dependência que interage com o MongoDB para a conexão da database, criação do model e das collections|
-| `nodemon` | Dependência que observa as atualizações realizadas nos documentos para rodar o servidor automaticamente|
-| `npm ou yarn` | Gerenciador de pacotes|
-| `MongoDb` | Banco de dado não relacional orietado a documentos|
-| `MongoDb Compass ou Mongo Atlas` | Interface gráfica para verificar se os dados foram persistidos|
- `Insomnia ou Postman` | Interface gráfica para realizar os testes|
-
-<br>
-<br>
-
-## 📁 Arquitetura 
-
-```
- 📁 Pokedex
-   |
-   |-  📁 src
-   |    |
-        |- 📁 📄 app.js
-   |    |- 📁 database
-   |         |- 📄 moogoseConnect.js
-   |
-   |    |- 📁 controllers
-   |         |- 📄 coachController.js
-   |         |- 📄 pokemonController.js
-   |
-   |    |- 📁 models
-   |         |- 📄 coachModel.js
-   |         |- 📄 pokemonModel.js
-   |
-   |    |- 📁 routes
-   |         |- 📄 coachRoutes.js 
-   |         |- 📄 pokemonRoutes.js 
-   |
-   |
-   |- 📄 .env
-   |- 📄 .env.example
-   |- 📄 .gitignore
-   |- 📄 package
-   |- 📄 server.js
-
+- Criar rota para listar colaboradoras no arquivo colaboradorasRoutes.js:
 ```
 
-<br>
-<br>
+router.get('/colaboradoras/', controller.getAll);
 
-# Contrato da API
- - Sim, eu torcia pela equipe Rocket
+```
+- Criar função getAll no colaboradorasController:
+```
 
-### Requisitos 
-- [ ] GET "**/treinadores**" Deverá retornar todos os treinadores cadastrados.
-- [ ] GET **"/treinador/[id]** Deverá retornar o treinador com o id informado.
+const getAll = (req, res) => {
+    Colaboradoras.find(function (err, colaboradoras) {
+        if (err) {
+            res.status(500).send({ message: err.message })
+        }
+        res.status(200).send(colaboradoras);
+    })
+};
 
-- [ ] GET "**/pokedex**" Deverá retornar todos os pokemons cadastrados e os seus treinadores.
-- [ ] GET **"/pokedex/[id]** Deverá retornar o pokemon com o id informado e o seu treinador
+module.exports = {
+    create,
+    getAll,
+}
 
-- [ ] POST   "**/treinador**" Deverá criar um treinador 
-- [ ] POST   "**/pokedex**"  Deverá criar um pokemon 
+```
+- Testar trazer as colaboradas via Postman
 
-- [ ] DELETE   "/treinadores/[ID]" Deverá deletar um treinador por id específico e retorna mensagem amigável
-- [ ] DELETE   "/pokedex/[ID]" Deverá deletar um pokemon por id específico e retorna mensagem amigável
+- Criar rota para deletar colaboradora no arquivo colaboradorasRouter.js:
+```
 
-- [ ] PATCH  "/treinadores/[ID]" Deverá alterar informação específica dentro de um titulo por id específico e retorna o título alterado
-- [ ] PATCH  "/pokedex/[ID]" Deverá alterar informação específica dentro de um estudio por id específico e retorna o título alterado
+router.delete('/colaboradoras/:id', controller.deleteById);
 
+```
+- Criar função de deletar no arquivo colaboradorasController: 
+```
 
-### Regras de negócio
+const deleteById = async (req, res) => {
+    try {
+        const { id } = req.params
+        await Colaboradoras.findByIdAndDelete(id)
+        const message = `A colaboradora com o ${id} foi deletada com sucesso!`
+        res.status(200).json({ message })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: error.message })
+    }
+};
 
-- [ ]  Não deverá ser possível criar treinador com o mesmo nome
-- [ ]  Para criar um novo pokemon, deverá vincular no momento da criação a um treinador já existente no sistema, utilizando o numero do id do treinador correspondente no corpo da requisição
+module.exports = {
+    create,
+    getAll,
+    deleteById,
+}
 
-<br>
-<br>
+```
+- Criar rota de login de colaboradora no arquivo colaboradorasRouter.js:
+```
 
-## Dados para Collection Treinador
+router.post('/colaboradoras/login', controller.login);
 
-- _id: autogerado e obrigatório
-- name: texto e obrigatório
-- age: numero e obrigatorio
-- team: texto e opcional
-- gender: texto, opcional e com default 'não informado'
-- region: texto e opcional
+```
+- Carregar as variáveis de ambiente no projeto, no início do arquivo app.js:
+```
 
-### API deve retornar seguinte JSON:
+require('dotenv-safe').config();
 
-```javascript
-[
-  {
-    _id: new ObjectId("62ab7c861ff392ef188b10fe"),
-    name: 'Ash',
-    age: 10,
-    team: null,
-    gender: 'male',
-    region: 'Kanto',
-    createdAt: 2022-06-16T18:55:02.023Z,
-    updatedAt: 2022-06-16T18:55:02.023Z,
-    __v: 0
-  },
-  {
-    _id: new ObjectId("62ab7c861ff392ef188b1104"),
-    name: 'Jessie',
-    age: 25,
-    team: 'Rocket',
-    gender: 'female',
-    region: 'Kanto',
-    createdAt: 2022-06-16T18:55:02.090Z,
-    updatedAt: 2022-06-16T18:55:02.090Z,
-    __v: 0
+```
+- Criar função de login no arquivo colaboradorasController: 
+```
+
+const jwt = require('jsonwebtoken');
+const SECRET = process.env.SECRET;
+
+const login = (req, res) => {
+    Colaboradoras.findOne({ email: req.body.email }, function (error, colaboradora) {
+        if (!colaboradora) {
+            return res.status(404).send(`Não existe colaboradora com o email ${req.body.email}`);
+        }
+
+        const senhaValida = bcrypt.compareSync(req.body.senha, colaboradora.senha);
+    
+        if (!senhaValida) {
+        /* 403 Forbidden é um código de resposta HTTP da classe de respostas de erro do cliente, a qual indica que o servidor recebeu a requisição e foi capaz de identificar o autor, porém não autorizou a emissão de um resposta. Os motivos para a proibição do acesso podem ser especificados no corpo da resposta.
+        */
+            return res.status(403).send('que senha é essa hein');
+        }
+        const token = jwt.sign({ email: req.body.email }, SECRET);
+        return res.status(200).send(token);
+    });
+
+}
+
+module.exports = {
+    create,
+    getAll,
+    deleteById
+    login,
+}
+
+```
+### Proteger rota GET treinadores do coachRoutes
+
+- No arquivo coachController.js adicionar:
+```
+
+const SECRET = process.env.SECRET //carrega secret do arquivo de env
+const jwt = require('jsonwebtoken'); // carrega lib jwt
+
+```
+- Criar método de autenticação em findAllCoaches:
+```
+
+const findAllCoaches = async (req, res) => {
+  try {
+    const authHeader = req.get('authorization'); // pega o header de autorização
+
+    if (!authHeader) { // envia uma mensagem de erro 401 quando vier vazio
+      return res.status(401).send('Kd os header parça');
+    }
+    
+    const token = authHeader.split(' ')[1]; //reserva o token em uma variavel
+    
+    await jwt.verify(token, SECRET, async function (erro) { //utiliza a lib jwt para verificar se o token é valido
+    
+      if (erro) { // se for inválido retorna 403
+      /* 403 Forbidden é um código de resposta HTTP da classe de respostas de erro do cliente, a qual indica que o servidor recebeu a requisição e foi capaz de identificar o autor, porém não autorizou a emissão de um resposta. Os motivos para a proibição do acesso podem ser especificados no corpo da resposta.
+      */
+        return res.status(403).send('Nope');
+      }
+      // se estiver tudo certo retorna os treinadores
+      const allCoaches = await CoachModel.find()
+      res.status(200).json(allCoaches)
+    
+    })
+
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: error.message })
   }
-]
+}
 
 ```
-<br>
-<br>
+- Para testar via postman, passar bearer token no header de autenticação $ Bearer TOKEN_JWT_AQUI
 
+# Exercício para casa!
 
-## Dados para Collection Pokemon
+![casa](https://gerarmemes.s3.us-east-2.amazonaws.com/memes/thumb/ffad82c9.jpg)
 
-- _id: autogerado e obrigatório
-- name: texto e obrigatório
-- type: texto e obrigatório
-- abilities: array de texto, opcional e com default []
-- description: texto e opcional
-- avaliable: bolean e opcional com o default true
+Devemos utilizar o projeto da aula anterior (S13), conforme fizemos em aula, e colocarmos uma rota para login e proteger todas as rotas de coach e pokedex, exigindo um token de autorização.
 
-### API deve retornar seguinte JSON:
+# Apresentação em Slides da Aula
 
-```javascript
-[
-  {
-    _id: new ObjectId("62ab7c861ff392ef188b1100"),
-    name: 'Pikachu',
-    type: 'Eletric',
-    abilities: [ 'Static' ],
-    description: 'Pikachu that can generate powerful electricity have cheek sacs that are extra soft and super stretchy.',
-    avaliable: true,
-    coach: new ObjectId("62ab7c861ff392ef188b10fe"),
-    createdAt: 2022-06-16T18:55:02.076Z,
-    updatedAt: 2022-06-16T18:55:02.076Z,
-    __v: 0
-  },
-  {
-    _id: new ObjectId("62ab7c861ff392ef188b1102"),
-    name: 'Bulbasaur',
-    type: 'Eletric',
-    abilities: [ 'Overgrow' ],
-    description: 'There is a plant seed on its back right from the day this Pokémon is born. The seed slowly grows larger.',
-    avaliable: true,
-    coach: new ObjectId("62ab7c861ff392ef188b10fe"),
-    createdAt: 2022-06-16T18:55:02.084Z,
-    updatedAt: 2022-06-16T18:55:02.084Z,
-    __v: 0
-  },
-  {
-    _id: new ObjectId("62ab7c861ff392ef188b1106"),
-    name: 'Wobbuffet',
-    type: 'Psychic',
-    abilities: [ 'Shadow Tag' ],
-    description: 'It hates light and shock. If attacked, it inflates its body to pump up its counterstrike.',
-    avaliable: true,
-    coach: new ObjectId("62ab7c861ff392ef188b1104"),
-    createdAt: 2022-06-16T18:55:02.095Z,
-    updatedAt: 2022-06-16T18:55:02.095Z,
-    __v: 0
-  },
-  {
-    _id: new ObjectId("62ab7c861ff392ef188b1108"),
-    name: 'Ekans',
-    type: 'Poison',
-    abilities: [ 'Shed Skin', 'Intimidate' ],
-    description: 'There is a plant seed on its back right from the day this Pokémon is born. The seed slowly grows larger.',
-    avaliable: true,
-    coach: new ObjectId("62ab7c861ff392ef188b1104"),
-    createdAt: 2022-06-16T18:55:02.102Z,
-    updatedAt: 2022-06-16T18:55:02.102Z,
-    __v: 0
-  }
-]
+> Aula: https://docs.google.com/presentation/d/1AYw0QCtyH1c8sr_Lg6Wop_2---Skkz9pOp-C6t2JCjs/edit?usp=sharing
+> Revisão: https://docs.google.com/presentation/d/17SapaGgQg1dj7e71Iw5YILhudv_FehCBilKcPlc3ulA/edit?usp=sharing
+
+# Leitura Extra Obrigatória
+
+> https://github.com/reprograma/On16-TodasEmTech-S14-Auth/blob/master/Extra/01.%20C%C3%B3digo%20Seguro.md
 ```
-<br>
-<br>
-
-
-##  🎓 Combinado da semana
- - [PARA O LAR](./para_o_lar//instru%C3%A7%C3%B5es.md) < clique aqui
-
-## 📖 Referências
-- https://www.gartner.com/en/information-technology/glossary/object-data-model
-- https://medium.com/tkssharma/node-js-with-mongoose-odm-9697c09665df
-- https://developer.mozilla.org/pt-BR/docs/Learn/Server-side/Express_Nodejs/mongoose
-- https://docs.mongodb.com/
-- https://docs.mongodb.com/manual/crud/
-- https://docs.atlas.mongodb.com/tutorial/create-new-cluster/
-- https://studio3t.com/academy/topic/mongodb-vs-sql-concepts/
-- https://dzone.com/articles/sql-vs-nosql
-- https://mongoosejs.com/docs/index.html
-
-### 🎥 Videos de apoio
-
-- [Resumo Mongodb - Codigo Fonte TV](https://www.youtube.com/watch?v=4dTI1mVLX3I)
-- [nodeJs Express Mongo - Api rest full Turitorial](https://www.youtube.com/watch?v=K5QaTfE5ylk)
-- [O que é banco de dados? - Curso em Video](https://www.youtube.com/watch?v=Ofktsne-utM)
-
-## 👋🏾 Minhas redes sociais
- - [LINKEDIN](https://www.linkedin.com/in/beatriz-ramerindo/)
- - [GITHUB](https://github.com/isjanebia)
- - [INSTAGRAN](https://www.instagram.com/isjanebea/)
- - [site] [beatriz.rarmerindo.com.br](beatriz.ramerindo.com.br)
- - [email] bea@ramerindo.com.br
-
