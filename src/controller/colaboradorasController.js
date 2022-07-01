@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const SECRET = process.env.SECRET
 
+
 const create = (req, res) => {
     const senhaComHash = bcrypt.hashSync(req.body.senha, 10)
     req.body.senha = senhaComHash
@@ -37,6 +38,8 @@ const deleteById = async (req, res) => {
     }
 }
 
+
+
 const login = (req, res) => {
     Colaboradoras.findOne({email: req.body.email}, function (error, colaboradora) {
         if (!colaboradora) {
@@ -57,3 +60,4 @@ const login = (req, res) => {
 module.exports = {
     create, getAll, deleteById, login
 }
+
